@@ -14,8 +14,6 @@
 //       });
 //   });
 
-
-
 const fetchScriptManifests = (callback) => {
     fetch('https://extensions-app-backend.herokuapp.com/')
         .then(res => res.json())
@@ -40,12 +38,11 @@ const fetchScript = (scriptName) => {
 
     return fetch(scriptsHost + scriptName)
         .then(res => res.text())
-       // .then(createHeadScript)
+        // .then(createHeadScript)
         .catch(error => {
             console.log('Errrrrrror! ', error);
         })
 };
-
 
 
 const handleResponse = (response) => {
@@ -66,15 +63,38 @@ const handleResponse = (response) => {
 
         let url = item.url;
         button.addEventListener('click', () => {
-            fetchScript(item.url).then((code) => {
-                chrome.extension.getBackgroundPage().console.log(code);
-                chrome.tabs.executeScript({
-                    code: `let script = document.createElement('script');
-    script.innerText = "${code}";
-    document.head.appendChild(script);
-    main();`
-                });
-            });
+            // fetchScript(item.url).then((code) => {
+            import(`https://extensions-app-backend.herokuapp.com${item.url}`)
+                .then((module) => {
+                    let main = module.default.main.toString();
+                    console.log(main);
+                    main = main.replace(/\n/g,'');
+                    main = main.replace(/"/g,'\\"');
+                    chrome.extension.getBackgroundPage().console.log(main);
+
+
+                    const script = document.createElement('script');
+                    script.innerHTML = main;
+
+                    chrome.extension.getBackgroundPage().console.log(module);
+                    // chrome.tabs.executeScript({
+                    //     code: main
+                    // });
+
+                    chrome.windows.getCurrent(function (currentWindow) {
+                        chrome.tabs.query({active: true, windowId: currentWindow.id},
+                            function(activeTabs) {
+                                chrome.extension.getBackgroundPage().console.log(chrome.tabs);
+                                chrome.tabs.executeScript(
+                                    activeTabs[0].id, {
+                                        code: `
+                                        var div=document.createElement("script");
+                                        div.appendChild(document.createTextNode("(function() { const main = ${main}; main(document.head); }())"));
+                                        document.head.appendChild(div);`
+                                    });
+                            });
+                    });
+                }).catch(console.log);
         });
 
         li.appendChild(h2);
@@ -97,4 +117,4 @@ const handleResponse = (response) => {
     })
 };
 
-window.onload(fetchScriptManifests(handleResponse));
+window.onload = () => fetchScriptManifests(handleResponse);
