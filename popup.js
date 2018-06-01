@@ -25,7 +25,15 @@ const fetchScriptManifests = (callback) => {
         })
 };
 
+const createHeadScript = (text) => {
+    const script = document.createElement('script');
+    script.innerHTML = text;
+
+    document.head.appendChild(script);
+};
+
 const fetchScript = (scriptName) => {
+    
     const scriptsHost = 'https://extensions-app-backend.herokuapp.com';
 
     return fetch(scriptsHost + scriptName)
@@ -36,12 +44,7 @@ const fetchScript = (scriptName) => {
         })
 };
 
-const createHeadScript = (text) => {
-    const script = document.createElement('script');
-    script.innerHTML = text;
 
-    document.head.appendChild(script);
-};
 
 const handleResponse = (response) => {
 
@@ -58,8 +61,9 @@ const handleResponse = (response) => {
         button.className = "extension__btn extension__btn_" + item.name;
         h2.textContent = item.name;
         button.textContent = "Install " + item.name;
-        button.dataset.name = item.url;
-        // button.onClick = fetchScript(item.url);
+
+        let url = item.url;
+        button.onclick = () => fetchScript(url);
 
         li.appendChild(h2);
         li.appendChild(button);
