@@ -28,11 +28,10 @@ const handleResponse = (arr) => {
         li.appendChild(h2);
         li.appendChild(button);
         ul.appendChild(li);
+
+        let container = document.getElementById('container');
+        container.appendChild(ul);
     });
-
-let container = document.getElementById('container');
-
-container.appendChild(ul)
 
 
     chrome.tabs.query({
