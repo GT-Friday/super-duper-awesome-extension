@@ -26,19 +26,21 @@ const fetchScriptManifests = (callback) => {
 };
 
 const createHeadScript = (text) => {
-    const script = document.createElement('script');
+    let script = document.createElement('script');
     script.innerHTML = text;
-
     document.head.appendChild(script);
 };
 
 const fetchScript = (scriptName) => {
-    
+
     const scriptsHost = 'https://extensions-app-backend.herokuapp.com';
+
+    chrome.extension.getBackgroundPage().console.log(scriptsHost + scriptName);
+    console.log('hey ' + scriptsHost + scriptName);
 
     return fetch(scriptsHost + scriptName)
         .then(res => res.text())
-        .then(createHeadScript)
+       // .then(createHeadScript)
         .catch(error => {
             console.log('Errrrrrror! ', error);
         })
@@ -63,7 +65,17 @@ const handleResponse = (response) => {
         button.textContent = "Install " + item.name;
 
         let url = item.url;
-        button.onclick = () => fetchScript(url);
+        button.addEventListener('click', () => {
+            fetchScript(item.url).then((code) => {
+                chrome.extension.getBackgroundPage().console.log(code);
+                chrome.tabs.executeScript({
+                    code: `let script = document.createElement('script');
+    script.innerText = "${code}";
+    document.head.appendChild(script);
+    main();`
+                });
+            });
+        });
 
         li.appendChild(h2);
         li.appendChild(button);
