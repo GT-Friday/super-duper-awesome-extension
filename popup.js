@@ -1,15 +1,46 @@
 let wiki = document.getElementById('wiki');
 let pink = document.getElementById('pink');
 
+let arrStub = [
+    {
+        name: "Wiki",
+        url: "https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Responses"
+    },
+    {
+        name: "Pink",
+        url: "https://developer.chrome.com/"
+    }
+];
+
 const fetchScriptManifests = (callback) => {
     fetch('https://extensions-app-backend.herokuapp.com/')
-    .then(res => res.json())
-    .then(json => callback(json))
-    .catch(error => { console.log('Errrrrrror! ', error); })
-  };
+        .then(res => res.json())
+        .then(json => callback(json))
+        .catch(error => {
+            console.log('Errrrrrror! ', error);
+        })
+};
 
-const handleResponse = (arr) => {
-    chrome.extension.getBackgroundPage().console.log(arr);
+const fetchScript = (scriptName) => {
+    const scriptsHost = 'https://extensions-app-backend.herokuapp.com';
+
+    return fetch(scriptsHost + scriptName)
+        .then(res => res.text())
+        .then(createHeadScript)
+        .catch(error => {
+            console.log('Errrrrrror! ', error);
+        })
+};
+
+const createHeadScript = (text) => {
+    const script = document.createElement('script');
+    script.innerHTML = text;
+
+    document.head.appendChild(script);
+};
+
+const handleResponse = (response) => {
+    chrome.extension.getBackgroundPage().console.log(response);
 
     let arr = response;
     let ul = document.createElement('ul');
@@ -37,21 +68,14 @@ const handleResponse = (arr) => {
     chrome.tabs.query({
         active: true,
         currentWindow: true
-    }, function (tabs) {
+    }, function(tabs) {
         chrome.tabs.executeScript(
             tabs[0].id, {
                 code: 'document.body.style.backgroundColor = "red";'
             });
     })
-}
+};
 
 pink.onclick = function() {
     fetchScriptManifests(handleResponse);
-  };
-
-  
-
-  let arr = [
-      {name: "Wiki", url: "https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Responses"},
-      {name: "Pink", url: "https://developer.chrome.com/"}
-  ];
+};
