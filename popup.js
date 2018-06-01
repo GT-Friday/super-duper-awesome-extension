@@ -1,16 +1,20 @@
-let wiki = document.getElementById('wiki');
-let pink = document.getElementById('pink');
+// chrome.runtime.onInstalled.addListener(function() {
+//     chrome.storage.sync.set({color: '#3aa757'}, function() {
+//       console.log("The color is green.");
+//     });
+//     fetchScriptManifests(handleResponse);
+//     chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
+//         chrome.declarativeContent.onPageChanged.addRules([{
+//           conditions: [new chrome.declarativeContent.PageStateMatcher({
+//             pageUrl: {hostEquals: 'developer.chrome.com'},
+//           })
+//           ],
+//               actions: [new chrome.declarativeContent.ShowPageAction()]
+//         }]);
+//       });
+//   });
 
-let arrStub = [
-    {
-        name: "Wiki",
-        url: "https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Responses"
-    },
-    {
-        name: "Pink",
-        url: "https://developer.chrome.com/"
-    }
-];
+
 
 const fetchScriptManifests = (callback) => {
     fetch('https://extensions-app-backend.herokuapp.com/')
@@ -40,7 +44,6 @@ const createHeadScript = (text) => {
 };
 
 const handleResponse = (response) => {
-    chrome.extension.getBackgroundPage().console.log(response);
 
     let arr = response;
     let ul = document.createElement('ul');
@@ -55,6 +58,8 @@ const handleResponse = (response) => {
         button.className = "extension__btn extension__btn_" + item.name;
         h2.textContent = item.name;
         button.textContent = "Install " + item.name;
+        button.dataset.name = item.url;
+        // button.onClick = fetchScript(item.url);
 
         li.appendChild(h2);
         li.appendChild(button);
@@ -76,6 +81,4 @@ const handleResponse = (response) => {
     })
 };
 
-pink.onclick = function() {
-    fetchScriptManifests(handleResponse);
-};
+window.onload(fetchScriptManifests(handleResponse));
